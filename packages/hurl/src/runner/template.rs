@@ -18,6 +18,7 @@
 use std::collections::HashMap;
 
 use hurl_core::ast::*;
+use uuid::Uuid;
 
 use super::core::{Error, RunnerError};
 use super::value::Value;
@@ -48,9 +49,15 @@ fn eval_template_element(
     }
 }
 
-pub fn eval_expression(expr: &Expr, variables: &HashMap<String, Value>) -> Result<String, Error> {
+pub fn eval_expression(expr: &Expr, variables_x: &HashMap<String, Value>) -> Result<String, Error> {
     let source_info = &expr.variable.source_info;
     let name = &expr.variable.name;
+    let mut variables = variables_x.clone();
+    variables.insert(
+        "fn-uuid-v4".to_string(),
+        Value::String(Uuid::new_v4().to_string()),
+    );
+
     match variables.get(name.as_str()) {
         Some(value) => {
             if value.is_renderable() {
